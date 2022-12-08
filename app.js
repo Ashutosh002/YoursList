@@ -5,12 +5,17 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const date = require(__dirname + "/date.js");
 var _ = require("lodash");
+require('dotenv').config();
+console.log(process.env.ATLAS_URL);
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
-mongoose.connect("mongodb+srv://admin-ashutosh:alliswell002@cluster0.hvhmu2v.mongodb.net/todolist", {
+
+//#----MongoDB Atlas Connection----//
+mongoose.connect(process.env.ATLAS_URL, {
   useNewUrlParser: true,
+  useUnifiedTopology: true
 });
 
 //#------Schema Created------//
@@ -78,9 +83,11 @@ app.post("/delete", function (req, res) {
     Item.findByIdAndRemove(checkboxID, function (err) {});
     res.redirect("/");
   } else {
+    //* Here $pull is from MongoDB and 
+    //* Find FindOneAndUpdate is from Mongoose
     List.findOneAndUpdate(
       { name: listName },
-      { $pull: { items: { _id: checkboxID } } },
+      { $pull: { items: { _id: checkboxID } } }, 
       function (err) {
         if (!err) {
           res.redirect("/" + listName);
@@ -119,5 +126,5 @@ app.get("/:customListName", function (req, res) {
 });
 
 app.listen(PORT, function () {
-  console.log("Server started on port" + PORT);
+  console.log("Server started on port " + PORT);
 });
